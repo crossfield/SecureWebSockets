@@ -117,25 +117,29 @@ public class WebSocketConnection implements WebSocket {
 			Log.d(TAG, "mWriter already NULL");
 		}
 
-		if (mSocket != null) {
-			mSocketThread.getHandler().post(new Runnable() {
+		if (mSocketThread != null) {
+			if (mSocket != null) {
+				mSocketThread.getHandler().post(new Runnable() {
 
+					@Override
+					public void run() {
+						mSocketThread.stopConnection();
+					}
+				});
+			} else {
+				Log.d(TAG, "mTransportChannel already NULL");
+			}
+			
+			mSocketThread.getHandler().post(new Runnable() {
+				
 				@Override
 				public void run() {
-					mSocketThread.stopConnection();
+					Looper.myLooper().quit();
 				}
 			});
 		} else {
-			Log.d(TAG, "mTransportChannel already NULL");
+			Log.d(TAG, "mSocketThread already NULL");
 		}
-		
-		mSocketThread.getHandler().post(new Runnable() {
-			
-			@Override
-			public void run() {
-				Looper.myLooper().quit();
-			}
-		});
 
 		onClose(code, reason);
 
