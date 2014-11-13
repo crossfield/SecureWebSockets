@@ -117,7 +117,7 @@ public class WebSocketConnection implements WebSocket {
 			Log.d(TAG, "mWriter already NULL");
 		}
 
-		if (mSocketThread != null) {
+		if (mSocketThread != null && mSocketThread.getHandler() != null) {
 			if (mSocket != null) {
 				mSocketThread.getHandler().post(new Runnable() {
 

@@ -90,6 +90,10 @@ public class WebSocketWriter extends Thread {
 	 *                      this class).
 	 */
 	public void forward(Object message) {
+		if(mHandler == null) {
+			Log.d(TAG, "mHandler already NULL");
+			return;
+		}
 		Message msg = mHandler.obtainMessage();
 		msg.obj = message;
 		mHandler.sendMessage(msg);
