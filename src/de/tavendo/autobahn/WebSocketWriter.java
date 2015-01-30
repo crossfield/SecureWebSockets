@@ -24,7 +24,11 @@ import java.lang.ref.WeakReference;
 import java.net.Socket;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -52,6 +56,8 @@ public class WebSocketWriter extends Thread {
 	private final ByteBuffer mApplicationBuffer;
 	private final Socket mSocket;
 
+	private Map<String, String> mExtraHeaders;
+
 	private OutputStream mOutputStream;
 
 	private Handler mHandler;
@@ -76,6 +82,10 @@ public class WebSocketWriter extends Thread {
 		this.mApplicationBuffer = ByteBuffer.allocate(options.getMaxFramePayloadSize() + 14);
 
 		Log.d(TAG, "WebSocket writer created.");
+	}
+
+	public void setExtraHeaders(Map<String, String> headers) {
+		mExtraHeaders = headers;
 	}
 
 
@@ -169,6 +179,14 @@ public class WebSocketWriter extends Thread {
 		}
 
 		mApplicationBuffer.put(("Sec-WebSocket-Version: " + WEB_SOCKETS_VERSION + CRLF).getBytes());
+
+		if (mExtraHeaders != null) {
+			Set<Map.Entry<String, String>> entries = mExtraHeaders.entrySet();
+			for (Map.Entry<String, String> header : entries) {
+				mApplicationBuffer.put((header.getKey() + ": " + header.getValue() + CRLF).getBytes());
+			}
+		}
+
 		mApplicationBuffer.put((CRLF).getBytes());
 	}
 

@@ -22,6 +22,10 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.Socket;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.net.SocketFactory;
 
@@ -56,6 +60,7 @@ public class WebSocketConnection implements WebSocket {
 	private WebSocketOptions mWebSocketOptions;
 	private boolean mPreviousConnection = false;
 
+	private final Map<String, String> mExtraHeaders = new HashMap<String, String>();
 
 
 	public WebSocketConnection() {
@@ -81,6 +86,13 @@ public class WebSocketConnection implements WebSocket {
 	public void sendBinaryMessage(byte[] payload) {
 		mWebSocketWriter.forward(new WebSocketMessage.BinaryMessage(payload));
 	}
+
+	public void addHeader(String key, String value) {
+		mExtraHeaders.put(key, value);
+		if (mWebSocketWriter != null) {
+			mWebSocketWriter.setExtraHeaders(mExtraHeaders);
+		}
+        }
 
 
 
@@ -311,6 +323,7 @@ public class WebSocketConnection implements WebSocket {
 	 */
 	protected void createWriter() {
 		mWebSocketWriter = new WebSocketWriter(mHandler, mSocket, mWebSocketOptions, WS_WRITER);
+		mWebSocketWriter.setExtraHeaders(mExtraHeaders);
 		mWebSocketWriter.start();
 
 		synchronized (mWebSocketWriter) {
