@@ -100,6 +100,34 @@ public class WebSocketConnection implements WebSocket {
 		return mSocket != null && mSocket.isConnected() && !mSocket.isClosed();
 	}
 
+        public void forceClose() {
+            if (mWebSocketReader != null) {
+                mWebSocketReader.quit();
+            }
+            if (mWebSocketWriter != null) {
+                mWebSocketWriter.forward(new WebSocketMessage.Quit());
+            }
+            if (mSocketThread != null && mSocketThread.getHandler() != null) {
+                if (mSocket != null) {
+                    mSocketThread.getHandler().post(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            mSocketThread.stopConnection();
+                        }
+                    });
+                }
+
+                mSocketThread.getHandler().post(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        Looper.myLooper().quit();
+                    }
+                });
+            }
+            onClose(WebSocketCloseNotification.INTERNAL_ERROR, "forceClose called");
+        }
 
 
 	private void failConnection(WebSocketCloseNotification code, String reason) {
